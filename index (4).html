@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyTrack - Huiswerk & Toets Planner</title>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Font Awesome Iconen -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --bg-dark: #08090e;
+      --card-bg: rgba(18, 20, 33, 0.75);
+      --input-bg: rgba(10, 12, 20, 0.8);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(108, 99, 255, 0.4);
+      --primary: #6c63ff;
+      --primary-gradient: linear-gradient(135deg, #6c63ff 0%, #4f46e5 100%);
+      --primary-glow: rgba(108, 99, 255, 0.4);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 16px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ExcuusExpert Ambient Glow Animation */
+    body::before {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(108, 99, 255, 0.22) 0%, rgba(0,0,0,0) 70%);
+      top: 5%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: -1;
+      animation: pulseGlow 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+      0% { transform: translateX(-50%) scale(0.8); opacity: 0.5; }
+      100% { transform: translateX(-50%) scale(1.3); opacity: 0.9; }
+    }
+
+    /* Header & Branding */
+    .header {
+      width: 100%;
+      max-width: 550px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-icon {
+      font-size: 24px;
+      color: #ffffff;
+    }
+
+    .brand-title {
+      font-size: 26px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ffffff 40%, #818cf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+
+    .stats-badge {
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    /* Main Container */
+    .app-container {
+      width: 100%;
+      max-width: 550px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 28px 24px;
+      border-radius: 24px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5),
+                  0 0 30px rgba(108, 99, 255, 0.1);
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #818cf8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title i {
+      color: #ffffff;
+    }
+
+    /* Form Fields */
+    .form-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 480px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #e2e8f0;
+      letter-spacing: 0.2px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 14px 16px;
+      background: var(--input-bg);
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: all 0.25s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--border-hover);
+      box-shadow: 0 0 15px rgba(108, 99, 255, 0.2);
+    }
+
+    /* Snelle Datuminvoer Styling */
+    .date-wrapper {
+      display: flex;
+      gap: 8px;
+    }
+
+    .date-wrapper input[type="date"] {
+      flex: 1;
+      color-scheme: dark;
+    }
+
+    .btn-quick-date {
+      padding: 0 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-quick-date:hover {
+      background: rgba(108, 99, 255, 0.2);
+      border-color: var(--border-hover);
+    }
+
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select-wrapper::after {
+      content: '\f107';
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #ffffff;
+      pointer-events: none;
+    }
+
+    select {
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+    }
+
+    /* Primary Button */
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      background: var(--primary-gradient);
+      color: white;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      box-shadow: 0 8px 20px var(--primary-glow);
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-submit i {
+      color: #ffffff;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(108, 99, 255, 0.5);
+    }
+
+    /* Filters */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .filter-btn {
+      flex: 1;
+      padding: 10px 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .filter-btn i {
+      color: #ffffff;
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+      background: rgba(108, 99, 255, 0.15);
+      border-color: var(--border-hover);
+      color: #818cf8;
+    }
+
+    /* Task Items */
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task-item {
+      background: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      transition: all 0.25s ease;
+      animation: popup 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .task-item.toets {
+      border-left: 4px solid var(--warning);
+    }
+
+    .task-item.huiswerk {
+      border-left: 4px solid var(--primary);
+    }
+
+    .task-item.completed {
+      opacity: 0.4;
+      border-left: 4px solid var(--text-muted);
+    }
+
+    .task-item.completed .task-title {
+      text-decoration: line-through;
+    }
+
+    .task-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .task-tags {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tag {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tag i {
+      color: #ffffff;
+      font-size: 9px;
+    }
+
+    .tag-subject {
+      background: rgba(255, 255, 255, 0.08);
+      color: #e2e8f0;
+      border: 1px solid var(--border-color);
+    }
+
+    .tag-type {
+      background: rgba(108, 99, 255, 0.2);
+      color: #818cf8;
+    }
+
+    .task-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .task-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .badge-date {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+    }
+
+    .badge-date.urgent {
+      background: rgba(239, 68, 68, 0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .action-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: #ffffff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .action-btn.delete:hover {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      padding: 16px;
+      font-weight: 500;
+    }
+
+    @keyframes popup {
+      from { opacity: 0; transform: translateY(10px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .footer-text {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">
+      <i class="fa-solid fa-graduation-cap brand-icon"></i>
+      <span class="brand-title">StudyTrack</span>
+    </div>
+    <div class="stats-badge" id="stats">0 taken open</div>
+  </header>
+
+  <div class="app-container">
+
+    <!-- Invoer Card -->
+    <section class="card">
+      <div class="card-title">
+        <i class="fa-solid fa-plus-circle"></i> Snel Taak Toevoegen
+      </div>
+      <form id="task-form">
+        <div class="form-grid">
+          <div class="form-row">
+            <div class="input-group">
+              <label for="subject">Vak</label>
+              <input type="text" id="subject" placeholder="bijv. Wiskunde" required />
+            </div>
+            <div class="input-group">
+              <label for="type">Type</label>
+              <div class="select-wrapper">
+                <select id="type">
+                  <option value="Huiswerk">Huiswerk</option>
+                  <option value="Toets">Toets / PW</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="title">Omschrijving</label>
+            <input type="text" id="title" placeholder="bijv. Hoofdstuk 4 leren" required />
+          </div>
+
+          <div class="input-group">
+            <label for="date">Datum / Deadline</label>
+            <div class="date-wrapper">
+              <input type="date" id="date" required />
+              <button type="button" class="btn-quick-date" id="btn-tomorrow">
+                <i class="fa-solid fa-forward-fast"></i> Morgen
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit">
+          <i class="fa-solid fa-bolt"></i> Toevoegen
+        </button>
+      </form>
+    </section>
+
+    <!-- Filter Knoppen -->
+    <div class="filter-bar">
+      <button class="filter-btn active" data-filter="all">Alles</button>
+      <button class="filter-btn" data-filter="Toets"><i class="fa-solid fa-pen-to-square"></i> Toetsen</button>
+      <button class="filter-btn" data-filter="Huiswerk"><i class="fa-solid fa-book-open"></i> Huiswerk</button>
+    </div>
+
+    <!-- Binnenkort Card -->
+    <section class="card">
+      <div class="card-title">
+        <i class="fa-solid fa-calendar-days"></i> Binnenkort
+      </div>
+      <div id="pending-tasks" class="task-list"></div>
+    </section>
+
+    <!-- Afgerond Card -->
+    <section class="card">
+      <div class="card-title" style="color: var(--text-muted);">
+        <i class="fa-solid fa-circle-check"></i> Afgerond
+      </div>
+      <div id="completed-tasks" class="task-list"></div>
+    </section>
+
+    <div class="footer-text">
+      StudyTrack &bull; Huiswerk &amp; Toets Planner &bull; Made by less
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'studytrack_excuus_v2';
+
+    const taskForm = document.getElementById('task-form');
+    const pendingTasksContainer = document.getElementById('pending-tasks');
+    const completedTasksContainer = document.getElementById('completed-tasks');
+    const statsElement = document.getElementById('stats');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    const dateInput = document.getElementById('date');
+    const btnTomorrow = document.getElementById('btn-tomorrow');
+
+    let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    let currentFilter = 'all';
+
+    // Snelheid: Standaard op VANDAAG instellen
+    const todayStr = new Date().toISOString().split('T')[0];
+    dateInput.min = todayStr;
+    dateInput.value = todayStr;
+
+    // Snelheid: 'Morgen' knop werking
+    btnTomorrow.addEventListener('click', () => {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      dateInput.value = tomorrow.toISOString().split('T')[0];
+    });
+
+    taskForm.addEventListener('submit', addTask);
+
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        filterButtons.forEach(b => b.classList.remove('active'));
+        const target = e.target.closest('.filter-btn');
+        target.classList.add('active');
+        currentFilter = target.dataset.filter;
+        renderTasks();
+      });
+    });
+
+    function addTask(e) {
+      e.preventDefault();
+
+      const newTask = {
+        id: Date.now().toString(),
+        subject: document.getElementById('subject').value.trim(),
+        title: document.getElementById('title').value.trim(),
+        date: dateInput.value,
+        type: document.getElementById('type').value,
+        completed: false
+      };
+
+      tasks.push(newTask);
+      saveAndRender();
+      
+      // Reset form en zet datum weer op vandaag
+      document.getElementById('title').value = '';
+      document.getElementById('subject').value = '';
+      dateInput.value = todayStr;
+    }
+
+    function toggleTask(id) {
+      tasks = tasks.map(task => {
+        if (task.id === id) {
+          return { ...task, completed: !task.completed };
+        }
+        return task;
+      });
+      saveAndRender();
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(task => task.id !== id);
+      saveAndRender();
+    }
+
+    function saveAndRender() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+      renderTasks();
+    }
+
+    function getDaysRemaining(dateString) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const targetDate = new Date(dateString);
+      targetDate.setHours(0, 0, 0, 0);
+
+      const diffTime = targetDate - today;
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+
+    function renderTasks() {
+      pendingTasksContainer.innerHTML = '';
+      completedTasksContainer.innerHTML = '';
+
+      const filteredTasks = tasks.filter(task => {
+        if (currentFilter === 'all') return true;
+        return task.type === currentFilter;
+      });
+
+      filteredTasks.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      filteredTasks.forEach(task => {
+        const daysLeft = getDaysRemaining(task.date);
+        let dateBadgeText = '';
+        let isUrgent = false;
+
+        if (daysLeft < 0) {
+          dateBadgeText = 'Verstreken';
+        } else if (daysLeft === 0) {
+          dateBadgeText = 'Vandaag!';
+          isUrgent = true;
+        } else if (daysLeft === 1) {
+          dateBadgeText = 'Morgen';
+          isUrgent = true;
+        } else {
+          dateBadgeText = `Over ${daysLeft} dg`;
+        }
+
+        const typeIcon = task.type === 'Toets' ? 'fa-pen-to-square' : 'fa-book-open';
+
+        const taskElement = document.createElement('div');
+        taskElement.className = `task-item ${task.type.toLowerCase()} ${task.completed ? 'completed' : ''}`;
+        taskElement.innerHTML = `
+          <div class="task-info">
+            <div class="task-tags">
+              <span class="tag tag-subject">${escapeHtml(task.subject)}</span>
+              <span class="tag tag-type"><i class="fa-solid ${typeIcon}"></i> ${task.type}</span>
+            </div>
+            <div class="task-title">${escapeHtml(task.title)}</div>
+          </div>
+          <div class="task-right">
+            <span class="badge-date ${isUrgent && !task.completed ? 'urgent' : ''}">${dateBadgeText}</span>
+            <div class="task-actions">
+              <button class="action-btn" onclick="toggleTask('${task.id}')" title="Status wijzigen">
+                <i class="fa-solid ${task.completed ? 'fa-rotate-left' : 'fa-check'}"></i>
+              </button>
+              <button class="action-btn delete" onclick="deleteTask('${task.id}')" title="Verwijderen">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          </div>
+        `;
+
+        if (task.completed) {
+          completedTasksContainer.appendChild(taskElement);
+        } else {
+          pendingTasksContainer.appendChild(taskElement);
+        }
+      });
+
+      if (pendingTasksContainer.children.length === 0) {
+        pendingTasksContainer.innerHTML = '<div class="empty-state">Geen openstaande taken!</div>';
+      }
+      if (completedTasksContainer.children.length === 0) {
+        completedTasksContainer.innerHTML = '<div class="empty-state">Nog niets afgerond.</div>';
+      }
+
+      const totalOpen = tasks.filter(t => !t.completed).length;
+      statsElement.textContent = `${totalOpen} ${totalOpen === 1 ? 'taak' : 'taken'} open`;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    renderTasks();
+  </script>
+</body>
+</html>
