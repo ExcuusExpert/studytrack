@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>StudyTrack Pro - Huiswerk & Toets Planner</title>
+  <title>StudyTrack - Huiswerk & Toets Planner</title>
+
+  <!-- GoatCounter Analytics -->
+  <script data-goatcounter="https://excuusexpert.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -309,14 +313,15 @@
     .input-group { display: flex; flex-direction: column; gap: 6px; }
     label { font-size: 12px; font-weight: 700; color: #e2e8f0; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    input, select {
+    input, select, textarea {
       width: 100%; padding: 12px 14px;
       background: var(--input-bg); color: var(--text-main);
       border: 1px solid var(--border-color); border-radius: 12px;
       font-size: 14px; font-family: inherit; outline: none;
       transition: all 0.25s ease;
     }
-    input:focus, select:focus { border-color: var(--border-hover); box-shadow: 0 0 15px rgba(108, 99, 255, 0.25); }
+    textarea { resize: vertical; min-height: 70px; }
+    input:focus, select:focus, textarea:focus { border-color: var(--border-hover); box-shadow: 0 0 15px rgba(108, 99, 255, 0.25); }
 
     .date-wrapper { display: flex; gap: 8px; }
     .date-wrapper input[type="date"] { flex: 1; color-scheme: dark; }
@@ -380,9 +385,13 @@
 
     .task-item {
       background: var(--input-bg); border: 1px solid var(--border-color);
-      border-radius: 16px; padding: 14px 16px; display: flex; align-items: center;
-      justify-content: space-between; gap: 12px; transition: all 0.25s ease;
+      border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column;
+      gap: 12px; transition: all 0.25s ease;
       animation: popup 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .task-main-row {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; width: 100%;
     }
 
     .task-item:hover { border-color: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
@@ -391,7 +400,7 @@
     .task-item.completed { opacity: 0.45; border-left: 4px solid var(--text-muted); }
     .task-item.completed .task-title { text-decoration: line-through; }
 
-    .task-info { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .task-info { display: flex; flex-direction: column; gap: 6px; flex: 1; }
     .task-tags { display: flex; align-items: center; gap: 6px; }
 
     .tag {
@@ -403,6 +412,37 @@
 
     .task-title { font-size: 14px; font-weight: 600; color: var(--text-main); }
     .task-right { display: flex; align-items: center; gap: 10px; }
+
+    /* Collapsible Notes Area */
+    .task-notes-details {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 12px;
+      width: 100%;
+    }
+    .task-notes-summary {
+      cursor: pointer;
+      color: #818cf8;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+      outline: none;
+    }
+    .task-notes-summary:hover { color: #a5b4fc; }
+    .task-notes-content {
+      margin-top: 8px;
+      color: #cbd5e1;
+      line-height: 1.5;
+      font-size: 13px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 8px;
+    }
 
     .badge-date {
       font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 8px;
@@ -427,6 +467,7 @@
       justify-content: center; font-size: 12px; transition: all 0.2s ease;
     }
     .action-btn:hover { background: rgba(255, 255, 255, 0.15); }
+    .action-btn.edit:hover { background: rgba(108, 99, 255, 0.25); color: #818cf8; border-color: var(--border-hover); }
     .action-btn.delete:hover { background: rgba(239, 68, 68, 0.2); color: #ef4444; border-color: rgba(239, 68, 68, 0.4); }
 
     .empty-state { text-align: center; color: var(--text-muted); font-size: 13px; padding: 16px; font-weight: 500; }
@@ -470,7 +511,7 @@
       </button>
       <nav class="nav-menu" id="navMenu">
         <ul>
-          <li><a href="https://excuusexpert.github.io" target="_blank" onclick="toggleMenu()"><i class="fa-solid fa-wand-magic-sparkles"></i> ExcuusExpert</a></li>
+          <li><a href="https://excuusexpert.github.io/excuusexpert" target="_blank" onclick="toggleMenu()"><i class="fa-solid fa-wand-magic-sparkles"></i> ExcuusExpert</a></li>
           <li><a href="https://www.snapchat.com/@excuus-expert" target="_blank" onclick="toggleMenu()"><i class="fa-brands fa-snapchat"></i> Snapchat</a></li>
           <li><a href="#" onclick="toggleMenu(); openSubmitModal();"><i class="fa-solid fa-paper-plane"></i> Verbetering Insturen</a></li>
         </ul>
@@ -501,6 +542,53 @@
         <textarea name="smoes" class="submit-textarea" placeholder="Typ hier jouw meesterlijke verbetering..." required></textarea>
         <button type="submit" class="generate-button">
           🚀 Versturen
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TAAK BEWERKEN MODAL POP-UP -->
+  <div id="editModal" class="modal-overlay" onclick="closeEditModal(event)">
+    <div class="modal-card">
+      <div class="modal-header">
+        <span class="modal-badge" style="background: rgba(108, 99, 255, 0.2); color: #a5b4fc;">✏️ TAAK BEWERKEN</span>
+        <button class="close-btn" onclick="closeEditModalDirect()">&times;</button>
+      </div>
+      <form id="edit-task-form" onsubmit="handleEditSubmit(event)">
+        <div class="form-grid">
+          <div class="form-row">
+            <div class="input-group">
+              <label for="edit-subject">Vak</label>
+              <input type="text" id="edit-subject" required />
+            </div>
+            <div class="input-group">
+              <label for="edit-type">Type</label>
+              <div class="select-wrapper">
+                <select id="edit-type">
+                  <option value="Huiswerk">Huiswerk</option>
+                  <option value="Toets">Toets / PW</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label for="edit-title">Omschrijving</label>
+            <input type="text" id="edit-title" required />
+          </div>
+
+          <div class="input-group">
+            <label for="edit-notes">Notities / Samenvatting</label>
+            <textarea id="edit-notes" placeholder="Typ hier extra notities..."></textarea>
+          </div>
+
+          <div class="input-group">
+            <label for="edit-date">Datum / Deadline</label>
+            <input type="date" id="edit-date" required />
+          </div>
+        </div>
+        <button type="submit" class="btn-submit">
+          <i class="fa-solid fa-floppy-disk"></i> Wijzigingen Opslaan
         </button>
       </form>
     </div>
@@ -539,6 +627,11 @@
           </div>
 
           <div class="input-group">
+            <label for="notes">Notities / Samenvatting (Optioneel)</label>
+            <textarea id="notes" placeholder="Typ hier extra notities, formules of een lange samenvatting..."></textarea>
+          </div>
+
+          <div class="input-group">
             <label for="date">Datum / Deadline</label>
             <div class="date-wrapper">
               <input type="date" id="date" required />
@@ -559,7 +652,7 @@
     <div class="controls-bar">
       <div class="search-wrapper">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" id="search-input" placeholder="Zoek op vak of titel..." />
+        <input type="text" id="search-input" placeholder="Zoek op vak, titel of notitie..." />
       </div>
       <div class="filter-bar">
         <button class="filter-btn active" data-filter="all">Alles</button>
@@ -611,6 +704,7 @@
     let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     let currentFilter = 'all';
     let searchQuery = '';
+    let editingTaskId = null;
 
     function toggleMenu() {
       document.getElementById('navMenu').classList.toggle('active');
@@ -626,6 +720,53 @@
 
     function closeSubmitModalDirect() {
       document.getElementById('submitModal').classList.remove('active');
+    }
+
+    /* EDIT MODAL FUNCTIONS */
+    function openEditModal(id) {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+
+      editingTaskId = id;
+      document.getElementById('edit-subject').value = task.subject;
+      document.getElementById('edit-type').value = task.type;
+      document.getElementById('edit-title').value = task.title;
+      document.getElementById('edit-notes').value = task.notes || '';
+      document.getElementById('edit-date').value = task.date;
+
+      document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeEditModal(e) {
+      if (e.target.id === 'editModal') closeEditModalDirect();
+    }
+
+    function closeEditModalDirect() {
+      document.getElementById('editModal').classList.remove('active');
+      editingTaskId = null;
+    }
+
+    function handleEditSubmit(e) {
+      e.preventDefault();
+      if (!editingTaskId) return;
+
+      tasks = tasks.map(task => {
+        if (task.id === editingTaskId) {
+          return {
+            ...task,
+            subject: document.getElementById('edit-subject').value.trim(),
+            type: document.getElementById('edit-type').value,
+            title: document.getElementById('edit-title').value.trim(),
+            notes: document.getElementById('edit-notes').value.trim(),
+            date: document.getElementById('edit-date').value
+          };
+        }
+        return task;
+      });
+
+      saveAndRender();
+      showToast('Taak bijgewerkt!', 'success');
+      closeEditModalDirect();
     }
 
     function showToast(message, type = 'info') {
@@ -699,6 +840,7 @@
         id: Date.now().toString(),
         subject: document.getElementById('subject').value.trim(),
         title: document.getElementById('title').value.trim(),
+        notes: document.getElementById('notes').value.trim(),
         date: dateInput.value,
         type: document.getElementById('type').value,
         completed: false
@@ -710,6 +852,7 @@
 
       document.getElementById('title').value = '';
       document.getElementById('subject').value = '';
+      document.getElementById('notes').value = '';
       dateInput.value = todayStr;
     }
 
@@ -761,7 +904,9 @@
 
       const filteredTasks = tasks.filter(task => {
         const matchesFilter = currentFilter === 'all' || task.type === currentFilter;
-        const matchesSearch = task.subject.toLowerCase().includes(searchQuery) || task.title.toLowerCase().includes(searchQuery);
+        const matchesSearch = task.subject.toLowerCase().includes(searchQuery) ||
+                              task.title.toLowerCase().includes(searchQuery) ||
+                              (task.notes && task.notes.toLowerCase().includes(searchQuery));
         return matchesFilter && matchesSearch;
       });
 
@@ -781,25 +926,41 @@
 
         const taskElement = document.createElement('div');
         taskElement.className = `task-item ${task.type.toLowerCase()} ${task.completed ? 'completed' : ''}`;
+        
+        const hasNotes = task.notes && task.notes.length > 0;
+
         taskElement.innerHTML = `
-          <div class="task-info">
-            <div class="task-tags">
-              <span class="tag tag-subject">${escapeHtml(task.subject)}</span>
-              <span class="tag tag-type"><i class="fa-solid ${typeIcon}"></i> ${task.type}</span>
+          <div class="task-main-row">
+            <div class="task-info">
+              <div class="task-tags">
+                <span class="tag tag-subject">${escapeHtml(task.subject)}</span>
+                <span class="tag tag-type"><i class="fa-solid ${typeIcon}"></i> ${task.type}</span>
+              </div>
+              <div class="task-title">${escapeHtml(task.title)}</div>
             </div>
-            <div class="task-title">${escapeHtml(task.title)}</div>
-          </div>
-          <div class="task-right">
-            <span class="badge-date ${isUrgent && !task.completed ? 'urgent' : ''}">${dateBadgeText}</span>
-            <div class="task-actions">
-              <button class="action-btn" onclick="toggleTask('${task.id}')" title="Status wijzigen">
-                <i class="fa-solid ${task.completed ? 'fa-rotate-left' : 'fa-check'}"></i>
-              </button>
-              <button class="action-btn delete" onclick="deleteTask('${task.id}')" title="Verwijderen">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
+            <div class="task-right">
+              <span class="badge-date ${isUrgent && !task.completed ? 'urgent' : ''}">${dateBadgeText}</span>
+              <div class="task-actions">
+                <button class="action-btn edit" onclick="openEditModal('${task.id}')" title="Bewerken">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button class="action-btn" onclick="toggleTask('${task.id}')" title="Status wijzigen">
+                  <i class="fa-solid ${task.completed ? 'fa-rotate-left' : 'fa-check'}"></i>
+                </button>
+                <button class="action-btn delete" onclick="deleteTask('${task.id}')" title="Verwijderen">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
             </div>
           </div>
+          ${hasNotes ? `
+            <details class="task-notes-details">
+              <summary class="task-notes-summary">
+                <i class="fa-solid fa-note-sticky"></i> Notities / Samenvatting
+              </summary>
+              <div class="task-notes-content">${escapeHtml(task.notes)}</div>
+            </details>
+          ` : ''}
         `;
 
         if (task.completed) completedTasksContainer.appendChild(taskElement);
