@@ -7,7 +7,7 @@
 
   <!-- GoatCounter Analytics -->
   <script data-goatcounter="https://excuusexpert.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
-
+  
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -62,7 +62,39 @@
       position: relative;
       transition: background-color 0.3s ease, color 0.3s ease;
     }
+.pomo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  cursor: pointer;
+  user-select: none;
+}
 
+.pomo-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #6c63ff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pomo-body {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.pomo-body.collapsed {
+  display: none;
+}
+    
     /* Ambient Glow Animation */
     body::before {
       content: '';
@@ -681,6 +713,8 @@
           <li><a href="https://excuusexpert.github.io/" onclick="toggleMenu()"><i class="fa-solid fa-house"></i> Home</a></li>
           <li><a href="https://excuusexpert.github.io/excuusexpert" target="_blank" onclick="toggleMenu()"><i class="fa-solid fa-wand-magic-sparkles"></i> ExcuusExpert</a></li>
           <li><a href="https://www.snapchat.com/@excuus-expert" target="_blank" onclick="toggleMenu()"><i class="fa-brands fa-snapchat"></i> Snapchat</a></li>
+          <li><a href="#" onclick="toggleMenu(); exporteer();"><i class="fa-solid fa-download"></i> Exporteer Taken</a></li>
+          <li><a href="#" onclick="toggleMenu(); importeer();"><i class="fa-solid fa-upload"></i> Importeer Taken</a></li>
           <li><a href="#" onclick="toggleMenu(); openSubmitModal();"><i class="fa-solid fa-paper-plane"></i> Verbetering Insturen</a></li>
         </ul>
       </nav>
@@ -699,7 +733,15 @@
   </div>
 
   <!-- Pomodoro Focus Timer Card -->
-  <div class="pomo-card">
+  <!-- Pomodoro Focus Timer Card -->
+<div class="pomo-card">
+  <div class="pomo-header" onclick="togglePomoCollapse()">
+    <div class="pomo-title">
+      <i class="fa-solid fa-stopwatch"></i> Focus Timer
+    </div>
+    <i class="fa-solid fa-chevron-down" id="pomo-toggle-icon"></i>
+  </div>
+  <div class="pomo-body" id="pomo-body">
     <div class="pomo-tabs">
       <button class="pomo-tab active" data-time="1500" onclick="setPomoMode(this, 1500)">🧠 Focus (25m)</button>
       <button class="pomo-tab" data-time="300" onclick="setPomoMode(this, 300)">☕ Pauze (5m)</button>
@@ -715,6 +757,7 @@
       </button>
     </div>
   </div>
+</div>
 
   <!-- INSTUUR MODAL POP-UP -->
   <div id="submitModal" class="modal-overlay" onclick="closeSubmitModal(event)">
@@ -871,7 +914,7 @@
           <i class="fa-solid fa-bolt"></i> Toevoegen
         </button>
 
-        <button type="button" class="btn-excuse-trigger" onclick="openExcuseModal()">
+        <button type="button" class="btn-excuse-trigger" onclick="window.location.href='https://excuusexpert.github.io/excuusexpert/'">
           <i class="fa-solid fa-wand-magic-sparkles"></i> Geen zin om te leren? Genereer een excuus 🪄
         </button>
       </form>
@@ -948,6 +991,30 @@
     let currentSort = 'date-asc';
     let searchQuery = '';
     let editingTaskId = null;
+
+    /* EXPORT & IMPORT LOGIC */
+    function exporteer() {
+      const data = localStorage.getItem(STORAGE_KEY) || '[]';
+      if (data === '[]') {
+        showToast('Geen taken om te exporteren!', 'danger');
+        return;
+      }
+      navigator.clipboard.writeText(btoa(data));
+      showToast('Exportcode gekopieerd naar klembord!', 'success');
+    }
+
+    function importeer() {
+      const code = prompt("Plak hier je exportcode:");
+      if (!code) return;
+      try {
+        const decoded = atob(code.trim());
+        JSON.parse(decoded); // Controleer op geldige JSON
+        localStorage.setItem(STORAGE_KEY, decoded);
+        location.reload(); // Herlaad de pagina direct
+      } catch (e) {
+        showToast('Ongeldige code!', 'danger');
+      }
+    }
 
     /* DAG / NACHT MODUS LOGIC */
     let currentTheme = localStorage.getItem(THEME_KEY) || 'dark';
@@ -1387,6 +1454,47 @@
 
     checkAndUpdateStreak();
     renderTasks();
+  /* INKLAP FUNCTIE FOR TIMER */
+function togglePomoCollapse() {
+  const body = document.getElementById('pomo-body');
+  const icon = document.getElementById('pomo-toggle-icon');
+  body.classList.toggle('collapsed');
+  
+  if (body.classList.contains('collapsed')) {
+    icon.className = 'fa-solid fa-chevron-right';
+  } else {
+    icon.className = 'fa-solid fa-chevron-down';
+  }
+}
+
+/* VERBETERD EINDGELUIDJE (3 opvolgende tonen) */
+function playBeepSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const notes = [523.25, 659.25, 783.99]; // C5, E5, G5 akkoord
+    
+    notes.forEach((freq, index) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      
+      const startTime = ctx.currentTime + (index * 0.15);
+      
+      gain.gain.setValueAtTime(0.3, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.35);
+      
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      
+      osc.start(startTime);
+      osc.stop(startTime + 0.35);
+    });
+  } catch (e) {
+    console.error(e);
+  }
+}
   </script>
 </body>
 </html>
