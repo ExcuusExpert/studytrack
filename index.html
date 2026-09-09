@@ -663,6 +663,30 @@
     .action-btn.edit:hover { background: rgba(108, 99, 255, 0.25); color: #6c63ff; border-color: var(--border-hover); }
     .action-btn.delete:hover { background: rgba(239, 68, 68, 0.2); color: #ef4444; border-color: rgba(239, 68, 68, 0.4); }
 
+    .speedlearner-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 8px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: rgba(108, 99, 255, 0.15);
+      border: 1px solid rgba(108, 99, 255, 0.35);
+      color: #a5b4fc;
+      text-decoration: none;
+      font-size: 11px;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+
+    .speedlearner-btn:hover {
+      background: rgba(108, 99, 255, 0.28);
+      border-color: rgba(108, 99, 255, 0.6);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+
     .empty-state { text-align: center; color: var(--text-muted); font-size: 13px; padding: 16px; font-weight: 500; }
 
     /* Toast Notifications */
@@ -1403,6 +1427,11 @@
                 <span class="tag ${priorityClass}">${task.priority || 'Gemiddeld'}</span>
               </div>
               <div class="task-title">${escapeHtml(task.title)}</div>
+              ${task.type === 'Toets' ? `
+                <a href="SpeedLearner.html" class="speedlearner-btn">
+                  <i class="fa-solid fa-bolt"></i> Woordjes leren met SpeedLearner
+                </a>
+              ` : ''}
             </div>
             <div class="task-right">
               <span class="badge-date ${isUrgent && !task.completed ? 'urgent' : ''}">${dateBadgeText}</span>
