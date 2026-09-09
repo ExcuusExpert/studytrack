@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpeedLearner Pro - ExcuusExpert v2.1</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0d0b18; --card: #161226; --card-inner: #211b38;
+      --primary: #8b5cf6; --primary-hover: #7c3aed; --accent: #06b6d4;
+      --success: #10b981; --warning: #f59e0b; --danger: #ef4444;
+      --text: #f8fafc; --sub: #94a3b8; --border: rgba(255, 255, 255, 0.1);
+    }
+    [data-theme="light"] {
+      --bg: #f1f5f9; --card: #ffffff; --card-inner: #f8fafc;
+      --primary: #7c3aed; --primary-hover: #6d28d9; --accent: #0284c7;
+      --success: #059669; --warning: #d97706; --danger: #dc2626;
+      --text: #0f172a; --sub: #64748b; --border: rgba(0, 0, 0, 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; transition: background 0.2s, color 0.2s; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; justify-content: center; padding: 20px; }
+    .app { width: 100%; max-width: 820px; background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); position: relative; }
+    .screen { display: none; flex-direction: column; gap: 16px; }
+    .screen.active { display: flex; }
+    
+    .app-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+    .brand { font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .brand i { color: var(--primary); }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .hud { display: flex; gap: 12px; font-size: 13px; font-weight: 700; background: var(--card-inner); padding: 8px 14px; border-radius: 20px; border: 1px solid var(--border); }
+    .icon-btn { background: var(--card-inner); border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 12px; cursor: pointer; font-size: 14px; }
+    
+    .stats-widget { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; background: var(--card-inner); padding: 14px; border-radius: 16px; border: 1px solid var(--border); text-align: center; }
+    .stat-box h4 { font-size: 18px; font-weight: 800; color: var(--primary); }
+    .stat-box p { font-size: 11px; color: var(--sub); font-weight: 700; }
+
+    .exam-banner { background: rgba(139, 92, 246, 0.15); border: 1px solid var(--primary); padding: 12px 16px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; }
+    .search-bar { flex: 1; position: relative; min-width: 200px; }
+    .search-bar input { padding-left: 36px; }
+    .search-bar i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--sub); }
+
+    .lists-grid { display: grid; gap: 12px; max-height: 320px; overflow-y: auto; }
+    .list-card { background: var(--card-inner); border: 1px solid var(--border); padding: 16px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .list-info h3 { font-size: 15px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+    .list-meta { font-size: 12px; color: var(--sub); display: flex; gap: 12px; margin-top: 4px; }
+
+    .heatmap-badge { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .heatmap-high { background: var(--success); box-shadow: 0 0 8px var(--success); }
+    .heatmap-mid { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
+    .heatmap-low { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+
+    .btn { padding: 10px 16px; background: var(--primary); border: none; border-radius: 12px; color: white; font-weight: 800; font-size: 13px; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; gap: 6px; }
+    .btn:hover { background: var(--primary-hover); }
+    .btn-sec { background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: var(--text); }
+    .btn-danger { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--danger); color: var(--danger); }
+    .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
+
+    input[type="text"], input[type="date"], textarea, select {
+      width: 100%; background: var(--card-inner); border: 1px solid var(--border); color: var(--text);
+      padding: 10px 14px; border-radius: 12px; font-size: 13px; outline: none;
+    }
+
+    .rows-container { display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto; }
+    .word-row { display: flex; align-items: center; gap: 8px; background: var(--card-inner); padding: 10px; border-radius: 12px; border: 1px solid var(--border); }
+    .row-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; flex: 1; }
+
+    .quiz-card { background: var(--card-inner); border: 1px solid var(--border); border-radius: 20px; padding: 24px; text-align: center; position: relative; }
+    .target-word { font-size: 30px; font-weight: 800; margin: 10px 0; }
+    .progress-bar { width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.3s; }
+    
+    .mc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .mc-btn { background: var(--card-inner); border: 1px solid var(--border); color: var(--text); padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer; text-align: center; }
+
+    .missed-list { display: flex; flex-direction: column; gap: 6px; text-align: left; max-height: 180px; overflow-y: auto; background: var(--card-inner); padding: 12px; border-radius: 12px; border: 1px solid var(--border); margin: 10px 0; }
+    .missed-item { color: var(--danger); font-size: 13px; font-weight: 700; display: flex; justify-content: space-between; }
+
+    body.focus-mode .app-header, body.focus-mode .stats-widget, body.focus-mode #timer-display { display: none !important; }
+
+    .toast { position: fixed; bottom: 20px; right: 20px; background: var(--success); color: white; padding: 12px 20px; border-radius: 12px; font-weight: 800; box-shadow: 0 10px 20px rgba(0,0,0,0.3); display: none; z-index: 1000; }
+
+    /* Mobiel Responsive Grid Fix */
+    @media (max-width: 600px) {
+      .stats-widget { grid-template-columns: 1fr 1fr; }
+      .mc-grid { grid-template-columns: 1fr; }
+      .row-inputs { grid-template-columns: 1fr; }
+      .app { padding: 16px; border-radius: 16px; }
+    }
+  </style>
+</head>
+<body class="hve-web-active hve-edit-mode">
+
+<div class="app">
+  <div class="app-header">
+    <div class="brand" style="cursor: move;"><i class="fa-solid fa-graduation-cap"></i> SpeedLearner</div>
+    <div class="header-actions">
+      <!-- Knop Terug naar StudyTrack -->
+      <a href="index.html" class="btn btn-sec btn-sm" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-arrow-left"></i> StudyTrack
+      </a>
+      
+      <div class="hud">
+        <span>🔥 <span id="hud-streak">0</span></span>
+        <span>⚡ <span id="hud-xp">0</span> XP</span>
+      </div>
+      <button class="icon-btn" onclick="toggleTheme()"><i class="fa-solid fa-sun"></i></button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD SCHERM -->
+  <div class="screen active" id="screen-dashboard">
+    <div class="stats-widget">
+      <div class="stat-box"><h4 id="st-total">0</h4><p>GELEERD</p></div>
+      <div class="stat-box"><h4 id="st-streak">0</h4><p>DAG STREAK</p></div>
+      <div class="stat-box"><h4 id="st-xp">0</h4><p>TOTAAL XP</p></div>
+      <div class="stat-box"><h4 id="st-mastery">31%</h4><p>BEHEERSING</p></div>
+    </div>
+
+    <div class="toolbar">
+      <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="search-input" placeholder="Zoek op titel of vak..." oninput="renderDashboard()">
+      </div>
+      <button class="btn btn-sec btn-sm" onclick="openBulkModal()"><i class="fa-solid fa-paste"></i> Bulk Import</button>
+      <button class="btn btn-sec btn-sm" onclick="exportData()"><i class="fa-solid fa-download"></i> Export</button>
+      <button class="btn btn-sec btn-sm" onclick="document.getElementById('import-file').click()"><i class="fa-solid fa-upload"></i> Import</button>
+      <input type="file" id="import-file" style="display:none;" accept=".json" onchange="importData(event)">
+      <button class="btn btn-sm" onclick="openEditor()"><i class="fa-solid fa-plus"></i> Nieuw</button>
+    </div>
+
+    <div class="lists-grid" id="lists-container"><div class="list-card">
+        <div class="list-info">
+          <h3><span class="heatmap-badge heatmap-low"></span> Engels - Core Vocabulary</h3>
+          <div class="list-meta">
+            <span>Engels</span>
+            <span>Gem. Mastery: 31% (2 woorden)</span>
+          </div>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-sm" onclick="startQuiz('demo-1')"><i class="fa-solid fa-play"></i> Start</button>
+          <button class="btn btn-sec btn-sm" onclick="openEditor('demo-1')"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-danger btn-sm" onclick="deleteList('demo-1')"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      </div></div>
+  </div>
+
+  <!-- EXAM PLANNER MODAL -->
+  <div class="screen" id="screen-exam">
+    <h2><i class="fa-solid fa-calendar"></i> Toetsdatum Instellen</h2>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <label>Kies de datum van je eerstvolgende toets:</label>
+      <input type="date" id="exam-date-input">
+      <label>Kies de lijst voor deze toets:</label>
+      <select id="exam-list-select"></select>
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn btn-sec" onclick="showScreen('screen-dashboard')">Annuleren</button>
+      <button class="btn" onclick="saveExamPlanner()">Opslaan</button>
+    </div>
+  </div>
+
+  <!-- BULK IMPORT MODAL -->
+  <div class="screen" id="screen-bulk">
+    <h2>Bulk Import (Plakken)</h2>
+    <input type="text" id="bulk-title" placeholder="Titel van de lijst...">
+    <textarea id="bulk-text" rows="8" placeholder="House = Huis
+Car = Auto
+Dog = Hond"></textarea>
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn btn-sec" onclick="showScreen('screen-dashboard')">Annuleren</button>
+      <button class="btn" onclick="processBulkImport()">Importeer</button>
+    </div>
+  </div>
+
+  <!-- EDITOR SCHERM -->
+  <div class="screen" id="screen-editor">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h2 id="editor-heading">Lijst Bewerken</h2>
+      <button class="btn btn-sec btn-sm" onclick="closeEditor()">Annuleren</button>
+    </div>
+    <div style="display:grid; grid-template-columns: 2fr 1fr; gap: 8px;">
+      <input type="text" id="list-title" placeholder="Titel van de lijst..." oninput="autoSaveDraft()">
+      <input type="text" id="list-subject" placeholder="Vak" oninput="autoSaveDraft()">
+    </div>
+    <div class="rows-container" id="editor-rows"></div>
+    <div style="display:flex; justify-content:space-between;">
+      <button class="btn btn-sec" onclick="addEditorRow()"><i class="fa-solid fa-plus"></i> Regel</button>
+      <button class="btn" onclick="saveList()"><i class="fa-solid fa-floppy-disk"></i> Opslaan</button>
+    </div>
+  </div>
+
+  <!-- QUIZ SCHERM -->
+  <div class="screen" id="screen-quiz">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-size:12px; color:var(--sub);" id="quiz-list-name">Lijst</span>
+      <span style="font-size:13px; font-weight:800;" id="timer-display"><i class="fa-regular fa-clock"></i> 00:00</span>
+      <button class="btn btn-sec btn-sm" onclick="toggleFocusMode()"><i class="fa-solid fa-expand"></i> Focus</button>
+      <button class="btn btn-sec btn-sm" onclick="exitQuiz()">Stoppen</button>
+    </div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px;">
+      <select id="practice-mode" onchange="setupQuizUI()">
+        <option value="spaced">🧠 Spaced Repetition</option>
+        <option value="mc">🎯 Multiple Choice</option>
+        <option value="fc">📖 Flashcards</option>
+      </select>
+      <select id="direction-mode" onchange="restartQueue()">
+        <option value="normal">Woord ➔ Antwoord</option>
+        <option value="reverse">Antwoord ➔ Woord</option>
+        <option value="mix">🔀 Mix</option>
+      </select>
+      <select id="filter-mode" onchange="restartQueue()">
+        <option value="all">Alle woorden</option>
+        <option value="due">⏰ Spaced Due (Herhalen)</option>
+        <option value="hard">🔴 Alleen moeilijke (&lt;50%)</option>
+      </select>
+    </div>
+
+    <div class="progress-bar"><div class="progress-fill" id="p-fill"></div></div>
+
+    <div class="quiz-card">
+      <span style="position:absolute; top:12px; right:14px; font-size:11px; font-weight:800; color:var(--accent);" id="mastery-badge">Mastery: 0%</span>
+      <p style="font-size:11px; text-transform:uppercase; color:var(--sub);">Opgave</p>
+      <div class="target-word">
+        <span id="quiz-target">...</span>
+        <button onclick="speakTarget()" class="icon-btn" style="border:none; color:var(--primary); font-size:20px;"><i class="fa-solid fa-volume-high"></i></button>
+      </div>
+    </div>
+
+    <!-- TYPE MODUS -->
+    <div id="type-container" style="display:flex; flex-direction:column; gap:8px;">
+      <input type="text" id="answer-input" placeholder="Typ je antwoord..." autocomplete="off">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn btn-sec btn-sm" onclick="triggerHint()"><i class="fa-solid fa-lightbulb"></i> Hint (H)</button>
+        <span style="font-size:11px; color:var(--sub);" id="speed-tag">⏱️ 0.0s</span>
+      </div>
+    </div>
+
+    <!-- MC MODUS -->
+    <div id="mc-container" class="mc-grid" style="display:none;"></div>
+
+    <!-- FLASHCARD MODUS -->
+    <div id="fc-container" style="display:none; flex-direction:column; gap:10px;">
+      <div id="fc-answer" class="quiz-card" style="display:none; font-size:20px; font-weight:700;">-</div>
+      <button class="btn btn-sec" onclick="flipFlashcard()"><i class="fa-solid fa-eye"></i> Toon Antwoord</button>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-danger" onclick="processResult(false)" style="flex:1;">Fout</button>
+        <button class="btn" onclick="processResult(true)" style="flex:1;">Goed</button>
+      </div>
+    </div>
+
+    <div id="hint-box" style="font-size:12px; color:var(--warning); text-align:center; font-weight:700;"></div>
+    <div id="feedback" style="font-size:13px; font-weight:800; text-align:center; min-height:20px;"></div>
+  </div>
+
+  <!-- SUMMARY SCHERM -->
+  <div class="screen" id="screen-summary" style="text-align:center;">
+    <i class="fa-solid fa-trophy" style="font-size:48px; color:var(--warning); margin:0 auto;"></i>
+    <h2>Sessie Voltooid!</h2>
+    <p id="summary-stats" style="font-size:13px; color:var(--sub); margin-top:6px;"></p>
+    
+    <div id="missed-container" style="display:none;">
+      <h3 style="font-size:14px; margin-top:10px; text-align:left;">❌ Gemiste Woorden</h3>
+      <div class="missed-list" id="missed-list"></div>
+      <button class="btn btn-sec" onclick="restartMissedWords()" style="width:100%; margin-bottom:10px;">
+        <i class="fa-solid fa-rotate-right"></i> Oefen Fouten Opnieuw
+      </button>
+    </div>
+
+    <button class="btn" onclick="showScreen('screen-dashboard')">Terug naar Dashboard</button>
+  </div>
+</div>
+
+<div class="toast" id="toast-msg"></div>
+
+<script>
+  const appState = {
+    lists: [],
+    streak: 0,
+    maxStreak: 0,
+    lastActiveDate: null,
+    totalXP: 0,
+    totalLearned: 0,
+    examDate: null,
+    examListId: null,
+    editingId: null,
+    activeList: null,
+    activeQueue: [],
+    missedWords: [],
+    currentItem: null,
+    totalStartCount: 0,
+    timerInterval: null,
+    secondsElapsed: 0,
+    wordStartTime: 0,
+    sessionStreak: 0,
+    sessionMaxStreak: 0,
+    sessionXP: 0,
+    flashcardFlipped: false
+  };
+
+  function escapeHTML(str) {
+    return String(str).replace(/[&<>"']/g, match => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[match]);
+  }
+
+  function shuffleArray(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  /* Data Normalisatie */
+  function normalizeWord(w) {
+    return {
+      q: w.q || '',
+      a: w.a || '',
+      stats: {
+        correct: w.stats?.correct || 0,
+        wrong: w.stats?.wrong || 0,
+        interval: w.stats?.interval || 1,
+        nextReview: w.stats?.nextReview || Date.now(),
+        lastReactionTime: w.stats?.lastReactionTime || null
+      }
+    };
+  }
+
+  /* Genuanceerde Mastery Formule (Gekoppeld aan nauwkeurigheid, interval en snelheid) */
+  function getMastery(stats) {
+    if (!stats) return 0;
+    const correct = stats.correct || 0;
+    const wrong = stats.wrong || 0;
+    const total = correct + wrong;
+    if (total === 0) return 0;
+    
+    const accuracy = correct / total; // Ratio 0 - 1
+    const accuracyScore = accuracy * 50; // Max 50 punten
+    const intervalScore = Math.min((stats.interval || 1) * 3, 35); // Max 35 punten
+    
+    let speedScore = 0;
+    if (stats.lastReactionTime && stats.lastReactionTime < 2500) speedScore = 15;
+    else if (stats.lastReactionTime && stats.lastReactionTime < 4500) speedScore = 8;
+
+    return Math.min(100, Math.round(accuracyScore + intervalScore + speedScore));
+  }
+
+  function getListMasteryAverage(list) {
+    if (!list.words.length) return 0;
+    const total = list.words.reduce((sum, w) => sum + getMastery(w.stats), 0);
+    return Math.round(total / list.words.length);
+  }
+
+  function applySpacedRepetition(stats, isCorrect, reactionTime) {
+    if (!stats.interval) stats.interval = 1;
+    stats.lastReactionTime = reactionTime;
+
+    if (isCorrect) {
+      stats.correct = (stats.correct || 0) + 1;
+      if (stats.interval === 1) stats.interval = 3;
+      else if (stats.interval === 3) stats.interval = 7;
+      else if (stats.interval === 7) stats.interval = 14;
+      else stats.interval = Math.round(stats.interval * 1.5);
+
+      stats.nextReview = Date.now() + (stats.interval * 24 * 60 * 60 * 1000);
+    } else {
+      stats.wrong = (stats.wrong || 0) + 1;
+      stats.interval = 1;
+      stats.nextReview = Date.now();
+    }
+  }
+
+  /* Dagelijkse Streaks Bijhouden */
+  function updateDailyStreak() {
+    const today = new Date().toISOString().split('T')[0];
+    if (!appState.lastActiveDate) {
+      appState.streak = 1;
+    } else if (appState.lastActiveDate !== today) {
+      const last = new Date(appState.lastActiveDate);
+      const now = new Date(today);
+      const diffDays = Math.round((now - last) / (1000 * 60 * 60 * 24));
+      if (diffDays === 1) appState.streak++;
+      else if (diffDays > 1) appState.streak = 1;
+    }
+    appState.lastActiveDate = today;
+    if (appState.streak > appState.maxStreak) appState.maxStreak = appState.streak;
+  }
+
+  window.onload = () => {
+    const saved = localStorage.getItem('sl_ent_state');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      appState.lists = (parsed.lists || []).map(l => ({
+        ...l, words: (l.words || []).map(normalizeWord)
+      }));
+      appState.streak = parsed.streak || 0;
+      appState.maxStreak = parsed.maxStreak || 0;
+      appState.lastActiveDate = parsed.lastActiveDate || null;
+      appState.totalXP = parsed.totalXP || 0;
+      appState.totalLearned = parsed.totalLearned || 0;
+      appState.examDate = parsed.examDate || null;
+      appState.examListId = parsed.examListId || null;
+    } else {
+      appState.lists = [{
+        id: 'demo-1', title: 'Engels - Core Vocabulary', subject: 'Engels',
+        words: [
+          normalizeWord({ q: 'House', a: 'Huis|Woning', stats: { correct: 2, wrong: 0, interval: 3 } }),
+          normalizeWord({ q: 'Car', a: 'Auto', stats: { correct: 0, wrong: 2, interval: 1 } })
+        ]
+      }];
+      saveToStorage();
+    }
+    checkStudyTrackDeepLink();
+    updateHUD();
+    renderDashboard();
+    renderExamPlanner();
+  };
+
+  function saveToStorage() {
+    localStorage.setItem('sl_ent_state', JSON.stringify({
+      lists: appState.lists, streak: appState.streak, maxStreak: appState.maxStreak,
+      lastActiveDate: appState.lastActiveDate, totalXP: appState.totalXP,
+      totalLearned: appState.totalLearned, examDate: appState.examDate, examListId: appState.examListId
+    }));
+  }
+
+  function checkStudyTrackDeepLink() {
+    if (window.location.hash.startsWith('#data=')) {
+      try {
+        const base64 = window.location.hash.replace('#data=', '');
+        const jsonStr = decodeURIComponent(atob(base64));
+        const newList = JSON.parse(jsonStr);
+        if (newList && newList.title && Array.isArray(newList.words)) {
+          newList.id = 'st-' + Date.now();
+          newList.words = deduplicateWords(newList.words.map(normalizeWord));
+          appState.lists.push(newList);
+          saveToStorage();
+          showToast(`🚀 StudyTrack lijst '${newList.title}' geïmporteerd!`);
+          window.location.hash = '';
+        }
+      } catch(e) { console.error('StudyTrack import mislukt', e); }
+    }
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('toast-msg');
+    toast.innerText = msg; toast.style.display = 'block';
+    setTimeout(() => toast.style.display = 'none', 3000);
+  }
+
+  function toggleTheme() {
+    const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function updateHUD() {
+    document.getElementById('hud-streak').innerText = appState.streak;
+    document.getElementById('hud-xp').innerText = appState.totalXP;
+    document.getElementById('st-total').innerText = appState.totalLearned;
+    document.getElementById('st-streak').innerText = appState.maxStreak;
+    document.getElementById('st-xp').innerText = appState.totalXP;
+
+    let totalM = 0, count = 0;
+    appState.lists.forEach(l => l.words.forEach(w => { totalM += getMastery(w.stats); count++; }));
+    document.getElementById('st-mastery').innerText = `${count > 0 ? Math.round(totalM / count) : 0}%`;
+  }
+
+  /* Heatmap Badges op het Dashboard */
+  function renderDashboard() {
+    const container = document.getElementById('lists-container');
+    const q = document.getElementById('search-input').value.toLowerCase();
+    container.innerHTML = '';
+
+    appState.lists.filter(l => l.title.toLowerCase().includes(q) || l.subject?.toLowerCase().includes(q)).forEach(list => {
+      const avgMastery = getListMasteryAverage(list);
+      let badgeClass = 'heatmap-low';
+      if (avgMastery >= 80) badgeClass = 'heatmap-high';
+      else if (avgMastery >= 50) badgeClass = 'heatmap-mid';
+
+      const card = document.createElement('div');
+      card.className = 'list-card';
+      card.innerHTML = `
+        <div class="list-info">
+          <h3><span class="heatmap-badge ${badgeClass}"></span> ${escapeHTML(list.title)}</h3>
+          <div class="list-meta">
+            <span>${escapeHTML(list.subject || 'Algemeen')}</span>
+            <span>Gem. Mastery: ${avgMastery}% (${list.words.length} woorden)</span>
+          </div>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-sm" onclick="startQuiz('${list.id}')"><i class="fa-solid fa-play"></i> Start</button>
+          <button class="btn btn-sec btn-sm" onclick="openEditor('${list.id}')"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn btn-danger btn-sm" onclick="deleteList('${list.id}')"><i class="fa-solid fa-trash"></i></button>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function deduplicateWords(words) {
+    const seen = new Set();
+    return words.filter(w => {
+      const key = `${w.q.toLowerCase().trim()}:${w.a.toLowerCase().trim()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  function openExamPlanner() {
+    const sel = document.getElementById('exam-list-select');
+    sel.innerHTML = appState.lists.map(l => `<option value="${l.id}">${escapeHTML(l.title)}</option>`).join('');
+    showScreen('screen-exam');
+  }
+
+  function saveExamPlanner() {
+    appState.examDate = document.getElementById('exam-date-input').value;
+    appState.examListId = document.getElementById('exam-list-select').value;
+    saveToStorage(); renderExamPlanner(); showScreen('screen-dashboard');
+  }
+
+  function renderExamPlanner() {
+    if (!appState.examDate) return;
+    const diffDays = Math.ceil((new Date(appState.examDate) - new Date()) / (1000 * 60 * 60 * 24));
+    const targetList = appState.lists.find(l => l.id === appState.examListId);
+    if (diffDays > 0 && targetList) {
+      const perDay = Math.ceil(targetList.words.length / diffDays);
+      document.getElementById('exam-planner-text').innerText = `Toets over ${diffDays} dagen voor '${targetList.title}'. Advies: ${perDay} woorden per dag.`;
+    }
+  }
+
+  function openBulkModal() {
+    document.getElementById('bulk-title').value = '';
+    document.getElementById('bulk-text').value = '';
+    showScreen('screen-bulk');
+  }
+
+  function processBulkImport() {
+    const title = document.getElementById('bulk-title').value.trim() || 'Imported List';
+    const lines = document.getElementById('bulk-text').value.split('\n');
+    let words = [];
+    lines.forEach(l => {
+      let p = l.includes('=') ? l.split('=') : l.split(',');
+      if (p.length >= 2) words.push(normalizeWord({ q: p[0].trim(), a: p[1].trim() }));
+    });
+    
+    words = deduplicateWords(words);
+    if (words.length) {
+      appState.lists.push({ id: 'list-' + Date.now(), title, subject: 'Bulk', words });
+      saveToStorage(); renderDashboard(); showScreen('screen-dashboard'); showToast("Bulk import geslaagd!");
+    }
+  }
+
+  function openEditor(listId = null) {
+    appState.editingId = listId;
+    document.getElementById('editor-rows').innerHTML = '';
+    
+    const draft = localStorage.getItem('sl_editor_draft');
+    if (!listId && draft) {
+      const parsedDraft = JSON.parse(draft);
+      document.getElementById('list-title').value = parsedDraft.title || '';
+      document.getElementById('list-subject').value = parsedDraft.subject || '';
+      parsedDraft.words.forEach(w => addEditorRow(w.q, w.a));
+    } else if (listId) {
+      const list = appState.lists.find(l => l.id === listId);
+      document.getElementById('list-title').value = list.title;
+      document.getElementById('list-subject').value = list.subject || '';
+      list.words.forEach(w => addEditorRow(w.q, w.a));
+    } else {
+      document.getElementById('list-title').value = '';
+      document.getElementById('list-subject').value = '';
+      for (let i = 0; i < 3; i++) addEditorRow();
+    }
+    showScreen('screen-editor');
+  }
+
+  function autoSaveDraft() {
+    if (appState.editingId) return;
+    const title = document.getElementById('list-title').value;
+    const subject = document.getElementById('list-subject').value;
+    const rows = document.querySelectorAll('#editor-rows .word-row');
+    const words = [];
+    rows.forEach(r => {
+      const q = r.querySelector('.input-q').value;
+      const a = r.querySelector('.input-a').value;
+      if (q || a) words.push({ q, a });
+    });
+    localStorage.setItem('sl_editor_draft', JSON.stringify({ title, subject, words }));
+  }
+
+  function closeEditor() { showScreen('screen-dashboard'); }
+
+  function addEditorRow(q='', a='') {
+    const row = document.createElement('div');
+    row.className = 'word-row';
+    row.innerHTML = `
+      <div class="row-inputs">
+        <input type="text" class="input-q" placeholder="Woord" value="${escapeHTML(q)}" oninput="autoSaveDraft()">
+        <input type="text" class="input-a" placeholder="Betekenis" value="${escapeHTML(a)}" oninput="autoSaveDraft()">
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="this.closest('.word-row').remove(); autoSaveDraft();"><i class="fa-solid fa-trash"></i></button>
+    `;
+    document.getElementById('editor-rows').appendChild(row);
+  }
+
+  function saveList() {
+    const title = document.getElementById('list-title').value.trim();
+    const subject = document.getElementById('list-subject').value.trim();
+    const rows = document.querySelectorAll('#editor-rows .word-row');
+    
+    let existingWordsMap = new Map();
+    if (appState.editingId) {
+      const oldList = appState.lists.find(l => l.id === appState.editingId);
+      oldList?.words.forEach(w => existingWordsMap.set(w.q.toLowerCase(), w.stats));
+    }
+
+    let words = [];
+    rows.forEach(r => {
+      const q = r.querySelector('.input-q').value.trim();
+      const a = r.querySelector('.input-a').value.trim();
+      if (q && a) {
+        const oldStats = existingWordsMap.get(q.toLowerCase());
+        words.push(normalizeWord({ q, a, stats: oldStats }));
+      }
+    });
+
+    words = deduplicateWords(words);
+
+    if (title && words.length) {
+      if (appState.editingId) {
+        const l = appState.lists.find(l => l.id === appState.editingId);
+        l.title = title; l.subject = subject; l.words = words;
+      } else {
+        appState.lists.push({ id: 'list-' + Date.now(), title, subject, words });
+        localStorage.removeItem('sl_editor_draft');
+      }
+      saveToStorage(); renderDashboard(); showScreen('screen-dashboard');
+    }
+  }
+
+  function deleteList(id) {
+    if (confirm("Lijst verwijderen?")) {
+      appState.lists = appState.lists.filter(l => l.id !== id);
+      saveToStorage(); renderDashboard();
+    }
+  }
+
+  function exportData() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState.lists));
+    const a = document.createElement('a'); a.href = dataStr; a.download = "speedlearner-backup.json";
+    document.body.appendChild(a); a.click(); a.remove();
+    showToast("✅ Backup opgeslagen!");
+  }
+
+  /* Import Normalisatie Fix */
+  function importData(e) {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (Array.isArray(imported)) {
+          const normalized = imported.map(l => ({
+            ...l, words: (l.words || []).map(normalizeWord)
+          }));
+          appState.lists.push(...normalized);
+          saveToStorage(); renderDashboard(); updateHUD();
+          showToast("✅ Data geïmporteerd!");
+        }
+      } catch (err) { alert("Ongeldig JSON bestand."); }
+    };
+    reader.readAsText(e.target.files[0]);
+  }
+
+  /* QUIZ ENGINE */
+  function startQuiz(listId) {
+    appState.activeList = appState.lists.find(l => l.id === listId);
+    document.getElementById('quiz-list-name').innerText = appState.activeList.title;
+    appState.sessionStreak = 0;
+    appState.sessionMaxStreak = 0;
+    appState.sessionXP = 0;
+    appState.missedWords = [];
+    
+    updateDailyStreak();
+    restartQueue();
+    setupQuizUI();
+    showScreen('screen-quiz');
+    startTimer();
+  }
+
+  function startTimer() {
+    stopTimer();
+    appState.secondsElapsed = 0;
+    updateTimerDisplay();
+    appState.timerInterval = setInterval(() => {
+      appState.secondsElapsed++;
+      updateTimerDisplay();
+    }, 1000);
+  }
+
+  function stopTimer() {
+    if (appState.timerInterval) clearInterval(appState.timerInterval);
+    appState.timerInterval = null;
+  }
+
+  function updateTimerDisplay() {
+    const m = String(Math.floor(appState.secondsElapsed / 60)).padStart(2, '0');
+    const s = String(appState.secondsElapsed % 60).padStart(2, '0');
+    document.getElementById('timer-display').innerHTML = `<i class="fa-regular fa-clock"></i> ${m}:${s}`;
+  }
+
+  function restartQueue() {
+    if (!appState.activeList) return;
+    const filter = document.getElementById('filter-mode').value;
+
+    let words = [...appState.activeList.words];
+    if (filter === 'hard') words = words.filter(w => getMastery(w.stats) < 50);
+    if (filter === 'due') words = words.filter(w => (w.stats.nextReview || 0) <= Date.now());
+
+    appState.activeQueue = words.map(w => ({ rawRef: w, wrongsInSession: 0 }));
+    shuffleArray(appState.activeQueue);
+    appState.totalStartCount = appState.activeQueue.length;
+    nextQuestion();
+  }
+
+  function setupQuizUI() {
+    const mode = document.getElementById('practice-mode').value;
+    document.getElementById('type-container').style.display = mode === 'spaced' ? 'flex' : 'none';
+    document.getElementById('mc-container').style.display = mode === 'mc' ? 'grid' : 'none';
+    document.getElementById('fc-container').style.display = mode === 'fc' ? 'flex' : 'none';
+  }
+
+  function nextQuestion() {
+    if (!appState.activeQueue.length) { finishQuiz(); return; }
+
+    const activeItem = appState.activeQueue[0];
+    const raw = activeItem.rawRef;
+    const dir = document.getElementById('direction-mode').value;
+    
+    let isRev = dir === 'reverse';
+    if (dir === 'mix') isRev = Math.random() < 0.5;
+
+    appState.currentItem = {
+      target: isRev ? raw.a : raw.q,
+      answer: isRev ? raw.q : raw.a,
+      rawRef: raw,
+      queueRef: activeItem
+    };
+
+    appState.wordStartTime = Date.now();
+    appState.flashcardFlipped = false;
+
+    document.getElementById('quiz-target').innerText = appState.currentItem.target;
+    document.getElementById('mastery-badge').innerText = `Mastery: ${getMastery(raw.stats)}%`;
+    document.getElementById('feedback').innerText = '';
+    document.getElementById('hint-box').innerText = '';
+    document.getElementById('fc-answer').style.display = 'none';
+
+    const done = appState.totalStartCount - appState.activeQueue.length;
+    const pct = Math.round((done / Math.max(1, appState.totalStartCount)) * 100);
+    document.getElementById('p-fill').style.width = `${pct}%`;
+
+    const mode = document.getElementById('practice-mode').value;
+    if (mode === 'spaced') {
+      const input = document.getElementById('answer-input'); input.value = ''; input.focus();
+    } else if (mode === 'mc') {
+      generateMCButtons();
+    }
+  }
+
+  function generateMCButtons() {
+    const container = document.getElementById('mc-container'); container.innerHTML = '';
+    const correctAns = appState.currentItem.answer.split('|')[0];
+    let options = [correctAns];
+
+    const allOtherAnswers = appState.activeList.words
+      .map(w => w.a.split('|')[0])
+      .filter(a => !appState.currentItem.answer.split('|').includes(a));
+
+    shuffleArray(allOtherAnswers);
+    while (options.length < 4 && allOtherAnswers.length) options.push(allOtherAnswers.pop());
+    shuffleArray(options);
+
+    options.forEach(opt => {
+      const btn = document.createElement('div');
+      btn.className = 'mc-btn'; btn.innerText = opt;
+      btn.onclick = () => processResult(appState.currentItem.answer.split('|').map(a=>a.toLowerCase().trim()).includes(opt.toLowerCase().trim()));
+      container.appendChild(btn);
+    });
+  }
+
+  function flipFlashcard() {
+    appState.flashcardFlipped = true;
+    const card = document.getElementById('fc-answer');
+    card.innerText = appState.currentItem.answer;
+    card.style.display = 'block';
+  }
+
+  function speakTarget() {
+    if ('speechSynthesis' in window) window.speechSynthesis.speak(new SpeechSynthesisUtterance(appState.currentItem.target));
+  }
+
+  function triggerHint() {
+    document.getElementById('hint-box').innerText = `💡 Eerste letter: ${appState.currentItem.answer.charAt(0)}...`;
+  }
+
+  function toggleFocusMode() { document.body.classList.toggle('focus-mode'); }
+
+  window.addEventListener('keydown', (e) => {
+    if (!document.getElementById('screen-quiz').classList.contains('active')) return;
+    if (e.key === 'Escape') exitQuiz();
+    if (e.key === 'h' || e.key === 'H') triggerHint();
+    if (e.key === 'r' || e.key === 'R') speakTarget();
+  });
+
+  document.getElementById('answer-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      const val = this.value.trim().toLowerCase();
+      const valid = appState.currentItem.answer.split('|').map(a => a.toLowerCase().trim());
+      processResult(valid.includes(val));
+    }
+  });
+
+  /* Infinite Loop Fix (Max 3 pogingen per woord) */
+  function processResult(isCorrect) {
+    const reactionTime = Date.now() - appState.wordStartTime;
+    const stats = appState.currentItem.rawRef.stats;
+    const fb = document.getElementById('feedback');
+
+    document.getElementById('speed-tag').innerText = `⏱️ ${(reactionTime/1000).toFixed(1)}s`;
+    applySpacedRepetition(stats, isCorrect, reactionTime);
+
+    if (isCorrect) {
+      appState.sessionStreak++;
+      if (appState.sessionStreak > appState.sessionMaxStreak) appState.sessionMaxStreak = appState.sessionStreak;
+      
+      const xpGained = reactionTime < 2500 ? 15 : 10;
+      appState.totalXP += xpGained; 
+      appState.sessionXP += xpGained;
+      appState.totalLearned++;
+      
+      fb.style.color = 'var(--success)'; fb.innerText = '✓ Goed!';
+      appState.activeQueue.shift(); // Verwijder uit actieve rij
+    } else {
+      appState.sessionStreak = 0;
+      appState.currentItem.queueRef.wrongsInSession++;
+
+      if (!appState.missedWords.some(w => w.q === appState.currentItem.target)) {
+        appState.missedWords.push({
+          q: appState.currentItem.target,
+          a: appState.currentItem.answer,
+          rawRef: appState.currentItem.rawRef
+        });
+      }
+
+      // Check tegen infinite loops
+      if (appState.currentItem.queueRef.wrongsInSession >= 3) {
+        fb.style.color = 'var(--danger)';
+        fb.innerText = `⚠️ 3x Fout! Antwoord: ${appState.currentItem.answer} (Overslaan)`;
+        appState.activeQueue.shift(); // Na 3 fouten definitief verwijderen uit de actieve quiz
+      } else {
+        fb.style.color = 'var(--danger)';
+        fb.innerText = `✗ Fout! Antwoord: ${appState.currentItem.answer}`;
+        appState.activeQueue.push(appState.activeQueue.shift()); // Achteraan sluiten
+      }
+    }
+    
+    saveToStorage(); updateHUD();
+    setTimeout(nextQuestion, 1200);
+  }
+
+  function finishQuiz() {
+    stopTimer();
+    document.body.classList.remove('focus-mode');
+    
+    const timeFormatted = `${Math.floor(appState.secondsElapsed / 60)}m ${appState.secondsElapsed % 60}s`;
+    document.getElementById('summary-stats').innerText = `Sessie Streak: 🔥 ${appState.sessionMaxStreak} | Behaalde XP: +${appState.sessionXP} | Tijd: ⏱️ ${timeFormatted}`;
+
+    const missedContainer = document.getElementById('missed-container');
+    const missedList = document.getElementById('missed-list');
+    
+    if (appState.missedWords.length) {
+      missedList.innerHTML = appState.missedWords.map(w => 
+        `<div class="missed-item"><span>${escapeHTML(w.q)}</span> <span>➔ ${escapeHTML(w.a)}</span></div>`
+      ).join('');
+      missedContainer.style.display = 'block';
+    } else {
+      missedContainer.style.display = 'none';
+    }
+
+    showScreen('screen-summary');
+  }
+
+  function restartMissedWords() {
+    if (!appState.missedWords.length) return;
+    appState.activeQueue = appState.missedWords.map(w => ({ rawRef: w.rawRef, wrongsInSession: 0 }));
+    appState.missedWords = [];
+    appState.sessionStreak = 0;
+    appState.sessionMaxStreak = 0;
+    setupQuizUI();
+    showScreen('screen-quiz');
+    startTimer();
+    nextQuestion();
+  }
+
+  function exitQuiz() { 
+    stopTimer();
+    document.body.classList.remove('focus-mode'); 
+    renderDashboard(); 
+    showScreen('screen-dashboard'); 
+  }
+</script>
+
+</body></html>
